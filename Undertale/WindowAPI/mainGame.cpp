@@ -25,7 +25,6 @@ HRESULT mainGame::init()
 	/*현재씬 설정*/
 	SCENEMANAGER->loadScene("로딩화면");
 
-
 	return S_OK;
 }
 

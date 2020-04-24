@@ -40,7 +40,7 @@ using namespace MY_UTIL;
 #include "sceneManager.h"
 #include "iniData.h"
 #include "soundManager.h"
-
+#include "itemManager.h"
 
 //=============================================================
 //	## 싱글톤을 추가한다 ##
@@ -52,7 +52,7 @@ using namespace MY_UTIL;
 #define SCENEMANAGER sceneManager::getSingleton()
 #define INIDATA iniData::getSingleton()
 #define SOUNDMANAGER soundManager::getSingleton()
-
+#define ITEMMANAGER itemManager::getSingleton()
 //=============================================================
 //	## 디파인문 ## (윈도우창 초기화)
 //=============================================================

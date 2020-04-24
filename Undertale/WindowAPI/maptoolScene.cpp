@@ -44,6 +44,8 @@ HRESULT maptoolScene::init()
 
 void maptoolScene::release()
 {
+	PLAYERDATA->setMapAmount(_mapAmount);
+	PLAYERDATA->setTileAmount(_tileAmount);
 }
 
 void maptoolScene::update()
@@ -325,9 +327,6 @@ void maptoolScene::update()
 			_rcArrow[0] = RectMake(_rcPalette.left + TILESIZE * 10, WINSIZEY - TILESIZE, TILESIZE, TILESIZE);				//맵툴 UI			   왠지 수정의예감
 			_rcArrow[1] = RectMake(_rcPalette.left + TILESIZE * 11, WINSIZEY - TILESIZE, TILESIZE, TILESIZE);				//맵툴 UI			   왠지 수정의예감
 		}
-
-
-		
 	}
 }
 

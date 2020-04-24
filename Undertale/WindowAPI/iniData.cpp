@@ -40,6 +40,7 @@ void iniData::saveINI(const char * fileName)
 	{
 		WritePrivateProfileString(_vIniData[i].section, _vIniData[i].key, _vIniData[i].value, dir);
 	}
+	this->clearIniData();
 }
 
 //문자로 값을 로드하기(파일이름, 섹션, 키)

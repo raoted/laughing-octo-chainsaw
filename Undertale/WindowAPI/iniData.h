@@ -20,6 +20,7 @@ private:
 public:
 	HRESULT init();
 	void release();
+	void clearIniData() { _vIniData.clear(); }
 
 	//데이터 추가하기
 	void addData(const char* section, const char* key, const char* value);

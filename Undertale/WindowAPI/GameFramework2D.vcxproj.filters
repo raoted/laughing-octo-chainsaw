@@ -171,6 +171,10 @@
     <ClInclude Include="tileNode.h">
       <Filter>MainGame\맵툴기초</Filter>
     </ClInclude>
+    <ClInclude Include="item.h" />
+    <ClInclude Include="itemManager.h">
+      <Filter>GameFramework2D\매니져</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="winMain.cpp">
@@ -265,6 +269,10 @@
     </ClCompile>
     <ClCompile Include="astarTestScene.cpp">
       <Filter>MainGame\에이스타</Filter>
+    </ClCompile>
+    <ClCompile Include="item.cpp" />
+    <ClCompile Include="itemManager.cpp">
+      <Filter>GameFramework2D\매니져</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
