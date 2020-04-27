@@ -5,6 +5,7 @@
 #define VK_1	0x31
 #define VK_2	0x32
 #define VK_3	0x33
+#define ICONSIZE	38
 
 class maptoolScene : public gameNode
 {
@@ -17,8 +18,17 @@ private:
 									//0:상	1:하	  2:좌  3:우
 
 	bool _setSaveLoad;				//세이브/로드창 띄워져있는가 없는가 판단
-	bool _slideTool;				//맵툴창이 최대화되어있는지 최소화되어있는지 판단
-	bool _sliding;					//최대화 또는 최소화 중인가?
+
+	short _drawMode;				//타일에 어떤 모드로 그릴 것인가?
+									//0 : 지우개
+									//1 : 펜
+									//2 : 사각형
+									//3 : 페인트
+	short _layer;					//어떤 레이어를 선택했는가?
+									//0 : 이벤트
+									//1 : 1층 레이어
+									//2 : 2층 레이어
+									//3 : 3층 레이어
 
 	int _setSaveSlot;				//세이브 슬롯 활성화
 	char _palettePageNum[128];
@@ -44,26 +54,37 @@ private:
 							ex) MAP0.map	MAP0.mapdata
 							*/
 
-
-
-/////////////////////////////////////////////////////////////////////////////////////////-YSH- unsigned 제거함
 	int _palettePage;		//지금 샘플 타일에 몇번째 샘플 이미지가 그려지는지를 저장한 변수.
-	bool _layer[LAYERCOUNT];		//몇 번째 레이어 층인지 표시.
 
 private:
-	tagTile _tiles[TILEX * TILEY];	//인게임화면에 사용되는 타일 총 400개
-	tagTile _saveTile[TILEX * TILEY];
+	TILE _addTile;	//_tiles를 초기화 할 때 사용
+	tagTile _tiles;	//인게임화면에 사용되는 타일 총 400개
+	vector<tagTile> _vTiles;
 	tagSampleTile _sampleTile[60]; //샘플타일 총 (12-2)*6 = 60개
+	drawField _drag;
 	tagCurrentTile _currentTile;	//현재타일
 
 
 private:
+	RECT _rcTool;		//새 맵, 펜, 지우개 등 도구 버튼들이 위치할 공간.
+
+	RECT _rcNewMap;		//새 맵을 생성하는 툴 버튼 Rect
+	RECT _rcSaveMap;	//모든 맵의 변경사항을 저장하는 툴 버튼 Rect
+	RECT _rcLayer[3];	//어떤 레이어에 그릴지 선택하는 툴 버튼 Rect
+	RECT _rcEvent;		//이벤트를 관리하는 툴 버튼 Rect
+	RECT _rcEraser;
+	RECT _rcPen;		//그리기 모드를 펜 형태로 변경하는 툴 버튼 Rect
+	RECT _rcRectangle;	//그리기 모드를 사각형으로 변경하는 툴 버튼 Rect
+	RECT _rcPaint;		//그리기 모드를 전체로 변경하는 툴 버튼 Rect
+
+	RECT _rcPalette;	//샘플타일을 그려줄 Rect;
+	RECT _rcMapList;	//맵 목록을 그려주는 공간
+	RECT _rcTileScreen;
 	RECT _rcScreen;		//화면 카메라 Rect;
 						//이 Rect와 충돌한 타일만 화면에 그려진다.
 	RECT _rcArrow[2];	//샘플타일을 변경할 화살표를 그려주는 Rect
 						//0번 : LeftArrow, 1번 : RightArrow
 	RECT _rcArrow5[2];
-	RECT _rcPalette;	//샘플타일을 그려줄 Rect;
 
 	RECT _rcMouse;		//마우스 포인터를 따라다니는 Rect
 						//중심점은 마우스 포인터의 좌표이며
@@ -76,12 +97,8 @@ private:
 	RECT _rcSave;			//세이브로드 UI안에서의 세이브
 	RECT _rcLoad;			//세이브로드 UI안에서의 로드
 
-
-
-	RECT _rcEraser;			//2번째칸	예정사항	지형 
 	RECT _rcDummy2;			//3번째칸	오브젝트
 	RECT _rcDummy3;			//4번째칸	지우개(오브젝트만 지운다, 지형은 덮어씌운다)
-	RECT _rcslide;			//5번째칸	최대화 / 최소화시키기
 
 
 	char _pageNum[100];
@@ -98,7 +115,9 @@ public:
 
 	//맵툴세팅
 	void maptoolSetup();
+	void selectSampleTile();			//팔레트에서 칠해줄 타일 선택하기
 	void setMap();						//일반 채우기
+	void setRectangle();
 	void setAllMap();					//전체 채우기
 	void save(char* str);				//제작한 맵을 저장하는 함수
 	void load(char* str);				//제작된 맵을 불러오는 함수
@@ -107,17 +126,14 @@ public:
 										//현재 버그로 미동작.
 	void loadMapData(char *str);		//샘플타일의 속성을 프로젝트 폴더의 하위 폴더인 MapData에서
 										//.mapdata 확장자를 불러온다.
+	void drawToolLayer();				//툴 레이어에 아이콘들을 그려준다.
+	void setTiles();
+
 
 
 	void frameBoxRender(int left, int top, int width, int height, float scale);			//팝업창(텍스트등)에 프레임씌우기
-																						
 	void frameBoxRender(RECT rc, float scale);											//프레임씌우기 사각형 넣어서 간편하게
-																						
 
-
-	void selectLayer1();	//1번 레이어 선택
-	void selectLayer2();	//2번 레이어 선택
-	void selectLayer3();	//3번 레이어 선택
 
 	//지형, 오브젝트 세터
 	TERRAIN terrainSelect(int frameX, int frameY);

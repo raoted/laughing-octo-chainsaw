@@ -56,11 +56,11 @@ using namespace MY_UTIL;
 //=============================================================
 //	## 디파인문 ## (윈도우창 초기화)
 //=============================================================
-#define WINNAME (LPTSTR)(TEXT(" 프로그래밍 19기 "))
-#define WINSTARTX	1600
-#define WINSTARTY	100
-#define WINSIZEX		1280
-#define WINSIZEY		720
+#define WINNAME (LPTSTR)(TEXT(" 프로그래밍 19기 - 2D 게임 모작"))
+#define WINSTARTX	0
+#define WINSTARTY	0
+#define WINSIZEX	1280
+#define WINSIZEY	720
 #define WINSTYLE		WS_CAPTION | WS_SYSMENU
 
 //=============================================================
