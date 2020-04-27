@@ -29,7 +29,7 @@ void loadingScene::update()
 	//로딩완료후 화면 변경
 	if (_loading->loadingDone())
 	{
-		SCENEMANAGER->loadScene("시작화면");
+		SCENEMANAGER->loadScene("맵툴기초");
 	}
 }
 
@@ -117,6 +117,15 @@ void loadingScene::loadingImage()
 	_loading->loadFrameImage("Fight", "Image/UI/Button/Fight.bmp", 112, 88, 1, 2);
 	_loading->loadFrameImage("Item", "Image/UI/Button/Itme.bmp", 112, 88, 1, 2);
 	_loading->loadFrameImage("Marcy", "Image/UI/Button/Marcy.bmp", 112, 88, 1, 2);
+	//#======================================== T o o l ============================================================
+	_loading->loadImage("NewMap", "Image/UI/Tool/map.bmp", 32, 32);
+	_loading->loadImage("SaveMap", "Image/UI/Tool/save.bmp", 32, 32);
+	_loading->loadFrameImage("MapLayer", "Image/UI/Tool/layer.bmp", 96, 32, 3, 1);
+	_loading->loadImage("Event", "Image/UI/Tool/event.bmp", 32, 32);
+	_loading->loadImage("Eraser", "Image/UI/Tool/eraser.bmp", 32, 32);
+	_loading->loadImage("Pencle", "Image/UI/Tool/pencle.bmp", 32, 32);
+	_loading->loadImage("Rectangle", "Image/UI/Tool/rectangle.bmp", 32, 32);
+	_loading->loadImage("Paint", "Image/UI/Tool/paint.bmp", 32, 32);
 
 	//#======================================== F o n t ============================================================
 	_loading->loadFrameImage("Number", "Image/UI/Font/Number.bmp", 280, 28, 10, 1);

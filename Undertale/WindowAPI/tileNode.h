@@ -2,8 +2,8 @@
 
 //게임화면 타일
 #define TILESIZE 40		//타일 픽셀
-#define TILEX 40		//맵 타일의 가로가 몇 칸인지
-#define TILEY 50		//맵 타일의 세로가 몇 칸인지
+#define TILEX 20		//맵 타일의 가로가 몇 칸인지
+#define TILEY 15		//맵 타일의 세로가 몇 칸인지
 #define TILESIZEX (TILEX * TILESIZE)		//맵 타일의 가로축 픽셀 수
 #define TILESIZEY (TILEY * TILESIZE)		//맵 타일의 세로축 픽셀 수
 
@@ -16,7 +16,7 @@
 
 
 //레이어 개수 정의
-#define LAYERCOUNT 3
+#define LAYERCOUNT 4
 //지형
 struct TERRAIN
 {
@@ -25,7 +25,7 @@ struct TERRAIN
 
 //타일구조체
 //한 타일당 레이어 개수 3개에요
-struct tagTile
+struct TILE
 {
 	TERRAIN terrain;
 	RECT rc;
@@ -40,6 +40,15 @@ struct tagTile
 	int tileFrameX[LAYERCOUNT];				//imagePage의 가로로 몇 번째 타일인지 저장하는 변수
 	int tileFrameY[LAYERCOUNT];				//imagePage의 세로로 면 번째 타일인지 저장하는 변수
 };
+struct tagTile
+{
+	vector<TILE> tile;
+	const short xSizeMax = 300;
+	const short ySizeMax = 300;
+
+	unsigned short xSize = 20;
+	unsigned short ySize = 20;
+};
 
 //이미지 타일 구조체
 struct tagSampleTile
@@ -47,8 +56,8 @@ struct tagSampleTile
 	RECT rc;
 
 	int imagePage;							//샘플타일 번호
-	int tileFrameX;							//가로 몇 번째에 그려지는지를 저장한 변수
-	int tileFrameY;							//세로 몇 번째에 그려지는지를 저장한 변수
+	int tileFrameX;							//가로 몇 번째가 그려지는지를 저장한 변수
+	int tileFrameY;							//세로 몇 번째가 그려지는지를 저장한 변수
 	
 	bool canMove = false;					//이 타일로 이동이 가능한가?
 											//기본값 : 이동불가
@@ -81,10 +90,5 @@ struct drawField
 	int startY;			//영역 그리기 시작 y좌표
 	int endX;			//영역 그리기 끝 x좌표
 	int endY;			//영역 그리기 끝 y좌표
-	int startIndex;		//그리기를 시작할 타일 번호
-	int sizeX;
-	int sizeY;
-	int dragWidth;
-	int dragHeight;
 };
 

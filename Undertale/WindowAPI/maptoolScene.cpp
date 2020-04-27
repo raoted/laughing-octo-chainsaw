@@ -4,27 +4,31 @@
 HRESULT maptoolScene::init()
 {
 	//타일맵 이미지 초기화
-	_rcScreen = RectMakeCenter(WINSIZEX / 2, WINSIZEY / 2, 600, 720);
-	_rcPalette = RectMakeCenter((_rcScreen.left + _rcScreen.right) / 2, _rcScreen.bottom - 40 * 4, 40 * SAMPLETILEX, 40 * SAMPLETILEY);
+	_rcScreen = RectMake(368, 0, WINSIZEX+32, WINSIZEY+32);
+	_rcTool = RectMake(0, 0, WINSIZEX, 42);
+	_rcNewMap = RectMake(_rcTool.left + 2, 2, ICONSIZE, ICONSIZE);
+	_rcSaveMap = RectMake(_rcNewMap.right + 2, 2, ICONSIZE, ICONSIZE);
+	_rcLayer[0] = RectMake(_rcSaveMap.right + 2, 2, ICONSIZE, ICONSIZE);
+	_rcLayer[1] = RectMake(_rcLayer[0].right + 2, 2, ICONSIZE, ICONSIZE);
+	_rcLayer[2] = RectMake(_rcLayer[1].right + 2, 2, ICONSIZE, ICONSIZE);
+	_rcEvent = RectMake(_rcLayer[2].right + 2, 2, ICONSIZE, ICONSIZE);
+	_rcEraser = RectMake(_rcEvent.right + 2, 2, ICONSIZE, ICONSIZE);
+	_rcPen = RectMake(_rcEraser.right + 2, 2, ICONSIZE, ICONSIZE);
+	_rcRectangle = RectMake(_rcPen.right + 2, 2, ICONSIZE, ICONSIZE);
+	_rcPaint = RectMake(_rcRectangle.right + 2, 2, ICONSIZE, ICONSIZE);
+
+	_rcPalette = RectMake(0, _rcTool.bottom, 40 * SAMPLETILEX, 40 * SAMPLETILEY);
+	_rcMapList = RectMake(0, _rcPalette.bottom, 40 * SAMPLETILEX, WINSIZEY - _rcPalette.bottom);
+	_rcTileScreen = RectMake(480, _rcTool.bottom, TILEX*TILESIZEX, TILEY*TILESIZEY);
 	_mapAmount = PLAYERDATA->getMapAmount();
 	_tileAmount = PLAYERDATA->getTileAmount();
 	_editMode = false;
 	_editMoveDirect = false;
 	_setSaveLoad = false;
-	_slideTool = true;
-	_sliding = false;
 	_setSaveSlot = 3;
 	//맵툴세팅
 	this->maptoolSetup();
-
-	for (int i = 0; i < TILEY; i++)
-	{
-		for (int j = 0; j < TILEX; j++)
-		{
-			_tiles[i * TILEX + j].rc = RectMake(TILESIZE * j, TILESIZE * i, TILESIZE, TILESIZE);
-		}
-	}
-
+	
 	_palettePage = 1;
 	sprintf_s(_dataName, "Data/Tiles/tile%d.tiledata", _palettePage);
 	//현재타일(0,0)좌표로 초기화
@@ -34,10 +38,10 @@ HRESULT maptoolScene::init()
 
 	//현재 드래그 좌표 초기화
 
-	_layer[0] = true;
-	_layer[1] = false;
-	_layer[2] = false;
+	_drawMode = 0;
+	_layer = 0;
 
+	setTiles();
 
 	return S_OK;
 }
@@ -139,6 +143,7 @@ void maptoolScene::update()
 			//로드완료
 		}
 	}
+	
 	else
 	{
 		_rcMouse = RectMakeCenter(_ptMouse.x, _ptMouse.y, TILESIZE, TILESIZE);
@@ -155,89 +160,166 @@ void maptoolScene::update()
 			loadMapData(_dataName);
 			_editMode = true;
 		}
-		//레이어 선택
-		if (INPUT->GetKeyDown(VK_1)) { selectLayer1(); }
-		if (INPUT->GetKeyDown(VK_2)) { selectLayer2(); }
-		if (INPUT->GetKeyDown(VK_3)) { selectLayer3(); }
 
 		//화면 이동
-		if (INPUT->GetKey(VK_UP))
+		if (INPUT->GetKeyDown(VK_UP))
 		{
-			for (int i = 0; i < TILEX * TILEY; i++)
+			if (_rcTileScreen.top > 40)
 			{
-				_tiles[i].rc.top += 10;
-				_tiles[i].rc.bottom += 10;
+				_rcTileScreen.bottom -= (_rcTileScreen.top - 40);
+				_rcTileScreen.top -= (_rcTileScreen.top - 40);
 			}
-		}
-		if (INPUT->GetKey(VK_DOWN))
-		{
-			for (int i = 0; i < TILEX * TILEY; i++)
+			else if (_rcTileScreen.top == 40) { return; }
+			else
 			{
-				_tiles[i].rc.top -= 10;
-				_tiles[i].rc.bottom -= 10;
+				_rcTileScreen.top += 10;
+				_rcTileScreen.bottom += 10;
 			}
 
-		}
-		if (INPUT->GetKey(VK_RIGHT))
-		{
-			for (int i = 0; i < TILEX * TILEY; i++)
+			for (int i = 0; i < _tiles.xSize * _tiles.ySize; i++)
 			{
-				_tiles[i].rc.left -= 10;
-				_tiles[i].rc.right -= 10;
+				_tiles.tile[i].rc.top = _rcTileScreen.top + (i / _tiles.xSize) * 40;
+				_tiles.tile[i].rc.bottom = _rcTileScreen.top + 40 + (i / _tiles.xSize) * 40;
 			}
 		}
-		if (INPUT->GetKey(VK_LEFT))
+		if (INPUT->GetKeyDown(VK_DOWN))
 		{
-			for (int i = 0; i < TILEX * TILEY; i++)
+			if (_tiles.tile[_tiles.xSize * _tiles.ySize - 1].rc.bottom < WINSIZEY)
 			{
-				_tiles[i].rc.left += 10;
-				_tiles[i].rc.right += 10;
+				for (int i = _tiles.xSize * _tiles.ySize - 1; i >= 0; i--)
+				{
+					_tiles.tile[i].rc.bottom = (i / _tiles.ySize) * 40;
+					_tiles.tile[i].rc.top = _tiles.tile[i].rc.bottom - 40;
+				}
+			}
+			else if (_tiles.tile[TILEX * TILEY - 1].rc.bottom == WINSIZEY) { return; }
+			else
+			{
+				_rcTileScreen.top -= 10;
+				_rcTileScreen.bottom -= 10;
+			}
+			for (int i = 0; i < _tiles.xSize * _tiles.ySize; i++)
+			{
+				_tiles.tile[i].rc.top = _rcTileScreen.top + (i / _tiles.xSize) * 40;
+				_tiles.tile[i].rc.bottom = _rcTileScreen.top + 40 + (i / _tiles.xSize) * 40;
+			}
+		}
+		if (INPUT->GetKeyDown(VK_RIGHT))
+		{
+			if (_tiles.tile[TILEX*TILEY-1].rc.right < WINSIZEX)
+			{
+				for (int i = TILEX * TILEY - 1; i >= 0; i--)
+				{
+					_tiles.tile[i].rc.right = (i % TILEX) * 40;
+					_tiles.tile[i].rc.left = _tiles.tile[i].rc.right - 40;
+				}
+			}
+			else if (_tiles.tile[TILEX * TILEY - 1].rc.right == WINSIZEX) { return; }
+			else
+			{
+				_rcTileScreen.left -= 10;
+				_rcTileScreen.right -= 10;
+			}
+		}
+		if (INPUT->GetKeyDown(VK_LEFT))
+		{
+			if (_tiles.tile[0].rc.left > 480)
+			{
+				for (int i = 0; i < TILEX * TILEY; i++)
+				{
+					_tiles.tile[i].rc.left = 480 + (i % TILEX) * 40;
+					_tiles.tile[i].rc.right = 520 + (i % TILEX) * 40;
+				}
+			}
+			else if (_tiles.tile[0].rc.left == 480) { return; }
+			else
+			{
+				_rcTileScreen.left += 10;
+				_rcTileScreen.right += 10;
 			}
 		}
 
 		//포인터가 샘플타일 위에 있다면 샘플타일 선택
 		//포인터가 맵타일 위에 있다면 선택되어 있는 샘플타일을 맵타일에 칠해준다.
 
-		if (INPUT->GetKey(VK_LBUTTON))
+		if (PtInRect(&_rcTileScreen, _ptMouse))
 		{
-			
-			if (INPUT->GetKey('A'))
+			if (INPUT->GetKey(VK_LBUTTON))
 			{
-				this->setAllMap();
+				if (_drawMode == 3) { setAllMap(); }
+				else if (_drawMode == 2) { setRectangle(); }
+				else if (_drawMode == 1) { setMap(); }
+				else if (_drawMode == 0) {}
+				else { return; }
 			}
-			else
-			{
-				this->setMap();//타일 채우기
-			}
-
 		}
 
 		if(INPUT->GetKeyUp(VK_LBUTTON))
 		{ 
+			//새 맵 만들기
+			if (PtInRect(&_rcNewMap, _ptMouse)) {}
+			//모든 맵 저장
+			if (PtInRect(&_rcSaveMap, _ptMouse)) {}
+			//1층 레이어 선택하기
+			if (PtInRect(&_rcLayer[0], _ptMouse))
+			{
+				_layer = 1;
+			}
+			//2층 레이어 선택하기
+			if (PtInRect(&_rcLayer[1], _ptMouse)) 
+			{
+				_layer = 2; 
+			}
+			//3층 레이어 선택하기
+			if (PtInRect(&_rcLayer[2], _ptMouse)) 
+			{
+				_layer = 3; 
+			}
+			//이벤트 레이어 선택하기
+			if (PtInRect(&_rcEvent, _ptMouse)) 
+			{
+				_layer = 0; 
+			}
+			//그리는 방식을 지우기 모드로 변경
 			if (PtInRect(&_rcEraser, _ptMouse))
 			{
-				_currentTile.pageNumber = -1;
-				//이부분 지우면 지우개 사이즈가 선택한 타일 사이즈만큼 들쑥날쑥해집니다
+				if (_layer != 0)
+				{
+					_drawMode = 0;
+				}
 			}
+			//그리는 방식을 펜으로 변경
+			if (PtInRect(&_rcPen, _ptMouse))
+			{
+				if (_layer != 0)
+				{
+					_drawMode = 1;
+				}
+			}//펜 모드
+			if (PtInRect(&_rcRectangle, _ptMouse))
+			{
+				if (_layer != 0)
+				{
+					_drawMode = 2;
+				}
+			}	//사각형 그리기
+			if (PtInRect(&_rcPaint, _ptMouse)) 
+			{
+				if (_layer != 0)
+				{
+					_drawMode = 3;
+				}
+			}		//타일 전체 칠하기
+
+
+			if (PtInRect(&_rcPalette, _ptMouse))
+			{
+				selectSampleTile();
+			}
+
 			if (PtInRect(&_rcDummy2, _ptMouse))
 			{
 				SCENEMANAGER->loadScene("시작화면");		//게임 화면으로 돌아가기
-			}
-			if (PtInRect(&_rcslide, _ptMouse))
-			{
-				if (!_sliding)
-				{
-					if (_slideTool)
-					{
-						_slideTool = false;
-						_sliding = true;
-					}
-					else
-					{
-						_slideTool = true;
-						_sliding = true;
-					}
-				}
 			}
 			if (PtInRect(&_rcArrow5[0], _ptMouse))
 			{
@@ -287,46 +369,17 @@ void maptoolScene::update()
 		}
 
 
-		if (_slideTool == true && _rcScreen.bottom - 280) //최대화시=>초기위치까지 올리기
-		{
-			if (_rcPalette.top < (_rcScreen.bottom - 280)) 
-			{
-				_sliding = false; 
-			}
-			else 
-			{
-				if (_sliding)
-				{
-					_rcPalette.top -= 5;
-					_rcPalette.bottom -= 5;
-				}
-			}
-		}
-		if (_slideTool == false) // 최소화시=>화면밖까지 내리기 (맨위에 일정이상 내려갔을시 버튼이동하는 이프문있음)
-		{
-			if (_rcPalette.top > WINSIZEY + 17) { _sliding = false; }
-			else
-			{
-				if (_sliding)
-				{
-					_rcPalette.top += 5;
-					_rcPalette.bottom += 5;
-				}
-			}
-		}
-
-
 		if (_rcPalette.top > WINSIZEY) // 최소화시 화면밖으로 나가면서 이하만큼남앗을때 버튼생성(이동) ※맵툴 셋업보다 밑에있어야함
 		{
-			_rcSaveLoad = RectMake(_rcPalette.left, _rcScreen.bottom - TILESIZE, TILESIZE * 2, TILESIZE);							//맵툴 UI
-			_rcEraser = RectMake(_rcPalette.left + TILESIZE * 2, WINSIZEY - TILESIZE, TILESIZE * 2, TILESIZE);				//맵툴 UI
-			_rcDummy2 = RectMake(_rcPalette.left + TILESIZE * 4, WINSIZEY - TILESIZE, TILESIZE * 2, TILESIZE);				//맵툴 UI
-			_rcslide = RectMake(_rcPalette.left + TILESIZE * 6, WINSIZEY - TILESIZE, TILESIZE * 2, TILESIZE);				//맵툴 UI
-			_rcArrow5[0] = RectMake(_rcPalette.left + TILESIZE * 8, WINSIZEY - TILESIZE, TILESIZE, TILESIZE);				//맵툴 UI
-			_rcArrow5[1] = RectMake(_rcPalette.left + TILESIZE * 9, WINSIZEY - TILESIZE, TILESIZE, TILESIZE);				//맵툴 UI
-			_rcArrow[0] = RectMake(_rcPalette.left + TILESIZE * 10, WINSIZEY - TILESIZE, TILESIZE, TILESIZE);				//맵툴 UI			   왠지 수정의예감
-			_rcArrow[1] = RectMake(_rcPalette.left + TILESIZE * 11, WINSIZEY - TILESIZE, TILESIZE, TILESIZE);				//맵툴 UI			   왠지 수정의예감
+			_rcSaveLoad = RectMake(_rcPalette.left, _rcScreen.bottom - TILESIZE, TILESIZE * 2, TILESIZE);		//맵툴 UI
+			_rcDummy2 = RectMake(_rcPalette.left + TILESIZE * 4, WINSIZEY - TILESIZE, TILESIZE * 2, TILESIZE);	//맵툴 UI
+			_rcArrow5[0] = RectMake(_rcPalette.left + TILESIZE * 8, WINSIZEY - TILESIZE, TILESIZE, TILESIZE);	//맵툴 UI
+			_rcArrow5[1] = RectMake(_rcPalette.left + TILESIZE * 9, WINSIZEY - TILESIZE, TILESIZE, TILESIZE);	//맵툴 UI
+			_rcArrow[0] = RectMake(_rcPalette.left + TILESIZE * 10, WINSIZEY - TILESIZE, TILESIZE, TILESIZE);	//맵툴 UI
+			_rcArrow[1] = RectMake(_rcPalette.left + TILESIZE * 11, WINSIZEY - TILESIZE, TILESIZE, TILESIZE);	//맵툴 UI
 		}
+
+		
 	}
 }
 
@@ -334,56 +387,57 @@ void maptoolScene::update()
 
 void maptoolScene::render()
 {
-	for (int i = 0; i < TILEX * TILEY; i++)
+
+	for (int i = 0; i < _tiles.xSize * _tiles.ySize; i++)
 	{
 		RECT rc;
-		if (IntersectRect(&rc, &_rcScreen, &_tiles[i].rc))
+		sprintf_s(_palettePageNum, "%d", i);
+		if (IntersectRect(&rc, &_rcScreen, &_tiles.tile[i].rc))
 		{
-			if (_tiles[i].imagePage[0] == -1)
+			Rectangle(getMemDC(), _tiles.tile[i].rc);
+			if (_tiles.tile[i].imagePage[0] != -1)
 			{
-				Rectangle(getMemDC(), _tiles[i].rc);
+				sprintf_s(_fileName, "Tile%d", _tiles.tile[i].imagePage[0]);
+				IMAGEMANAGER->scaleFrameRender(_fileName, getMemDC(), _tiles.tile[i].rc.left, _tiles.tile[i].rc.top,
+					_tiles.tile[i].tileFrameX[0], _tiles.tile[i].tileFrameY[0], 2.0f);
 			}
+		}
+		else { continue; }
+		TextOut(getMemDC(), _tiles.tile[i].rc.left, _tiles.tile[i].rc.top, _palettePageNum, strlen(_palettePageNum));
+	}
+
+	for (int i = 0; i < _tiles.xSize * _tiles.ySize; i++)
+	{
+		RECT rc;
+		if (IntersectRect(&rc, &_rcScreen, &_tiles.tile[i].rc))
+		{
+			if (_tiles.tile[i].imagePage[0] == -1 && _tiles.tile[i].imagePage[1] == -1) { continue; }
 			else
 			{
-				sprintf_s(_fileName, "Tile%d", _tiles[i].imagePage[0]);
-				IMAGEMANAGER->scaleFrameRender(_fileName, getMemDC(), _tiles[i].rc.left, _tiles[i].rc.top, _tiles[i].tileFrameX[0], _tiles[i].tileFrameY[0], 2.0f);
+				sprintf_s(_fileName, "Tile%d", _tiles.tile[i].imagePage[1]);
+				IMAGEMANAGER->scaleFrameRender(_fileName, getMemDC(), _tiles.tile[i].rc.left, _tiles.tile[i].rc.top, _tiles.tile[i].tileFrameX[1], _tiles.tile[i].tileFrameY[1], 2.0f);
 			}
 		}
 		else { continue; }
 	}
 
-	for (int i = 0; i < TILEX * TILEY; i++)
+	for (int i = 0; i < _tiles.xSize * _tiles.ySize; i++)
 	{
 		RECT rc;
-		if (IntersectRect(&rc, &_rcScreen, &_tiles[i].rc))
+		if (IntersectRect(&rc, &_rcScreen, &_tiles.tile[i].rc))
 		{
-			if (_tiles[i].imagePage[0] == -1 && _tiles[i].imagePage[1] == -1) { continue; }
+			if (_tiles.tile[i].imagePage[0] == -1 && _tiles.tile[i].imagePage[1] == -1 && _tiles.tile[i].imagePage[2] == -1) { continue; }
 			else
 			{
-				sprintf_s(_fileName, "Tile%d", _tiles[i].imagePage[1]);
-				IMAGEMANAGER->scaleFrameRender(_fileName, getMemDC(), _tiles[i].rc.left, _tiles[i].rc.top, _tiles[i].tileFrameX[1], _tiles[i].tileFrameY[1], 2.0f);
-			}
-		}
-		else { continue; }
-	}
-
-	for (int i = 0; i < TILEX * TILEY; i++)
-	{
-		RECT rc;
-		if (IntersectRect(&rc, &_rcScreen, &_tiles[i].rc))
-		{
-			if (_tiles[i].imagePage[0] == -1 && _tiles[i].imagePage[1] == -1 && _tiles[i].imagePage[2] == -1) { continue; }
-			else
-			{
-				sprintf_s(_fileName, "Tile%d", _tiles[i].imagePage[2]);
-				IMAGEMANAGER->scaleFrameRender(_fileName, getMemDC(), _tiles[i].rc.left, _tiles[i].rc.top, _tiles[i].tileFrameX[2], _tiles[i].tileFrameY[2], 2.0f);
+				sprintf_s(_fileName, "Tile%d", _tiles.tile[i].imagePage[2]);
+				IMAGEMANAGER->scaleFrameRender(_fileName, getMemDC(), _tiles.tile[i].rc.left, _tiles.tile[i].rc.top, _tiles.tile[i].tileFrameX[2], _tiles.tile[i].tileFrameY[2], 2.0f);
 			}
 		}
 		else { continue; }
 	}
 
 
-	
+
 
 	//레이어 이미지 그리기
 	//if (_layer[0]) { IMAGEMANAGER->findImage("Layer")->frameRender(getMemDC(), _rcScreen.right - 128, _rcScreen.top, 0, 0); }
@@ -407,7 +461,7 @@ void maptoolScene::render()
 
 		sprintf_s(_pageName, "Tile%d", _palettePage);
 		IMAGEMANAGER->findImage(_pageName)->scaleFrameRender(getMemDC(), _sampleTile[i].rc.left, _sampleTile[i].rc.top, _sampleTile[i].tileFrameX, _sampleTile[i].tileFrameY, 2.0f);
-		
+
 		if (_editMode && _editCanMove)
 		{
 			if (_sampleTile[i].canMove == true) { sprintf_s(_canMoveChar, "%d", 1); }
@@ -432,22 +486,10 @@ void maptoolScene::render()
 		IMAGEMANAGER->findImage("SaveLoad")->render(getMemDC(), _rcSaveLoad.left, _rcSaveLoad.top);
 	}
 
-	IMAGEMANAGER->findImage("Erase")->render(getMemDC(), _rcEraser.left, _rcEraser.top);
-	if (PtInRect(&_rcEraser, _ptMouse)) {
-		IMAGEMANAGER->findImage("EraseOff")->render(getMemDC(), _rcEraser.left, _rcEraser.top);
-	}
-
 	IMAGEMANAGER->findImage("HomeOff")->render(getMemDC(), _rcDummy2.left, _rcDummy2.top);
 	if (PtInRect(&_rcDummy2, _ptMouse)) {
 		IMAGEMANAGER->findImage("Home")->render(getMemDC(), _rcDummy2.left, _rcDummy2.top);
 	}
-
-	IMAGEMANAGER->findImage("SlideOff")->render(getMemDC(), _rcslide.left, _rcslide.top);
-	if (PtInRect(&_rcslide, _ptMouse)) {
-		IMAGEMANAGER->findImage("Slide")->render(getMemDC(), _rcslide.left, _rcslide.top);
-	}
-
-	frameBoxRender(_rcPalette, 1.0f);
 
 	HBRUSH brush = CreateSolidBrush(RGB(16, 64, 168));
 	HBRUSH oldBrush = (HBRUSH)SelectObject(getMemDC(), brush);
@@ -466,8 +508,6 @@ void maptoolScene::render()
 
 	if (_setSaveLoad == true)
 	{
-		frameBoxRender(_rcSaveWindow, 1.0f); //세이브확인창프레임
-
 		Rectangle(getMemDC(), _rcSaveWindow);
 		IMAGEMANAGER->findImage("textbox")->render(getMemDC(), _rcSaveWindow.left, _rcSaveWindow.top, 0, 0,
 			_rcSaveWindow.right - _rcSaveWindow.left, _rcSaveWindow.bottom - _rcSaveWindow.top);
@@ -494,21 +534,10 @@ void maptoolScene::render()
 		FrameRect(getMemDC(), _rcSaveSlot[0], RGB(255, 255, 255));				 //세이브슬롯 구분해주기
 		FrameRect(getMemDC(), _rcSaveSlot[1], RGB(255, 255, 255));				 //세이브슬롯 구분해주기
 		FrameRect(getMemDC(), _rcSaveSlot[2], RGB(255, 255, 255));				 //세이브슬롯 구분해주기
-
-		Rectangle(getMemDC(), _rcSave);
-		frameBoxRender(_rcSave, 0.3f);															//세이브 버튼 이미지..미안..
-		IMAGEMANAGER->findImage("save")->render(getMemDC(), _rcSave.left - 1, _rcSave.top - 1);
-
-		Rectangle(getMemDC(), _rcLoad);
-		frameBoxRender(_rcLoad, 0.3f);															//로드 버튼 마찬가지로 이미지 지못미..
-		IMAGEMANAGER->findImage("load")->render(getMemDC(), _rcLoad.left - 1, _rcLoad.top - 1);
-
 	}
+	drawToolLayer();
+	Rectangle(getMemDC(), _rcMapList);
 
-	
-	
-
-	if (_slideTool) { Rectangle(getMemDC(), 0, 0, 400, 400); }
 }
 
 void maptoolScene::maptoolSetup()
@@ -524,9 +553,7 @@ void maptoolScene::maptoolSetup()
 	}
 
 	_rcSaveLoad = RectMake(_rcPalette.left + TILESIZE * 10, _rcPalette.top, TILESIZE * 2, TILESIZE);					//맵툴 UI 1번칸
-	_rcEraser =	RectMake(_rcPalette.left + TILESIZE * 10, _rcPalette.top + TILESIZE, TILESIZE * 2, TILESIZE);			//맵툴 UI 2번칸
 	_rcDummy2 =	RectMake(_rcPalette.left + TILESIZE * 10, _rcPalette.top + TILESIZE * 2, TILESIZE * 2, TILESIZE);		//맵툴 UI 3번칸
-	_rcslide = RectMake(_rcPalette.left + TILESIZE * 10, _rcPalette.top + TILESIZE * 3, TILESIZE * 2, TILESIZE);		//맵툴 UI 4번칸
 	_rcArrow5[0] = RectMake(_rcPalette.left + TILESIZE * 10, _rcPalette.top + TILESIZE * 4, TILESIZE, TILESIZE);
 	_rcArrow5[1] = RectMake(_rcPalette.left + TILESIZE * 11, _rcPalette.top + TILESIZE * 4, TILESIZE, TILESIZE);
 	_rcArrow[0] = RectMake(_rcPalette.left + TILESIZE * 10, _rcPalette.top + TILESIZE * 5, TILESIZE, TILESIZE);			//맵툴 UI 맨아래번칸
@@ -541,97 +568,93 @@ void maptoolScene::maptoolSetup()
 	_rcLoad = RectMakeCenter(WINSIZEX / 2 + 70, WINSIZEY / 2 + 35, 80, 35);							//세이브로드UI
 }
 
+void maptoolScene::selectSampleTile()
+{
+	for (int i = 0; i < SAMPLETILEX * SAMPLETILEY; i++)
+	{
+		if (PtInRect(&_sampleTile[i].rc, _ptMouse))
+		{
+
+			_currentTile.pageNumber = _palettePage;
+			_currentTile.x = _sampleTile[i].tileFrameX;
+			_currentTile.y = _sampleTile[i].tileFrameY;
+			_canMove = _sampleTile[i].canMove;
+			break;
+		}
+	}
+}
+
 
 
 void maptoolScene::setMap()
 {
-	if (PtInRect(&_rcPalette, _ptMouse))
+	if (_layer != 0) 
 	{
-		for (int i = 0; i < SAMPLETILEX * SAMPLETILEY; i++)
+		for (int i = 0; i < _tiles.xSize * _tiles.ySize; i++)
 		{
-			if (PtInRect(&_sampleTile[i].rc, _ptMouse))
+			if (PtInRect(&_tiles.tile[i].rc, _ptMouse))
 			{
-				_currentTile.pageNumber = _palettePage;
-				_currentTile.x = _sampleTile[i].tileFrameX;
-				_currentTile.y = _sampleTile[i].tileFrameY;
-				_canMove = _sampleTile[i].canMove;
-				break;
-			}
-		}
-	}
-	//팝업 아래에서 버튼눌렀을때 뒤에 칠 안되게 넘겨주기
-	
-	if (PtInRect(&_rcSaveLoad, _ptMouse)) { return; }
-	else if (PtInRect(&_rcslide, _ptMouse)) { return; }
-	else if (PtInRect(&_rcArrow5[0], _ptMouse)) { return; }
-	else if (PtInRect(&_rcArrow5[1], _ptMouse)) { return; }
-	else if (PtInRect(&_rcArrow[0], _ptMouse)) { return; }
-	else if (PtInRect(&_rcArrow[1], _ptMouse)) { return; }
-	else if (PtInRect(&_rcPalette, _ptMouse)) { return; }
-		
-	for (int i = 0; i < TILEX * TILEY; i++)
-	{
-		if (PtInRect(&_tiles[i].rc, _ptMouse))
-		{
-			//제일 아래쪽 레이어인가?
-			if (_layer[0])
-			{
-				_tiles[i].canMove[0] = _canMove;
-				_tiles[i].tileFrameX[0] = _currentTile.x;
-				_tiles[i].tileFrameY[0] = _currentTile.y;
-				_tiles[i].imagePage[0] = _currentTile.pageNumber;
-				_tiles[i].terrain = terrainSelect(_currentTile.x, _currentTile.y);
-			}
-			//중간 레이어인가?
-			if (_layer[1])
-			{
-				_tiles[i].canMove[1] = _canMove;
-				_tiles[i].tileFrameX[1] = _currentTile.x;
-				_tiles[i].tileFrameY[1] = _currentTile.y;
-				_tiles[i].imagePage[1] = _currentTile.pageNumber;
-				_tiles[i].terrain = terrainSelect(_currentTile.x, _currentTile.y);
-			}
-			//제일 위쪽의 레이어인가?
-			if (_layer[2])
-			{
-				_tiles[i].canMove[2] = _canMove;
-				_tiles[i].tileFrameX[2] = _currentTile.x;
-				_tiles[i].tileFrameY[2] = _currentTile.y;
-				_tiles[i].imagePage[2] = _currentTile.pageNumber;
-				_tiles[i].terrain = terrainSelect(_currentTile.x, _currentTile.y);
+				_tiles.tile[i].canMove[_layer - 1] = _canMove;
+				_tiles.tile[i].tileFrameX[_layer - 1] = _currentTile.x;
+				_tiles.tile[i].tileFrameY[_layer - 1] = _currentTile.y;
+				if (_drawMode == 0) { _tiles.tile[i].imagePage[_layer -1] = -1; }
+				else { _tiles.tile[i].imagePage[_layer - 1] = _currentTile.pageNumber; }
+				_tiles.tile[i].terrain = terrainSelect(_currentTile.x, _currentTile.y);
+
 			}
 		}
 	}
 }
 
-void maptoolScene::setAllMap() {
-	for (int i = 0; i < TILEX * TILEY; i++) {
-		//가장 하단 레이어
-		if (_layer[0])
+void maptoolScene::setRectangle()
+{
+	for (int i = 0; i < _tiles.xSize * _tiles.ySize; i++)
+	{
+		if (PtInRect(&_tiles.tile[i].rc, _ptMouse))
 		{
-			_tiles[i].canMove[0] = _canMove;
-			_tiles[i].imagePage[0] = _currentTile.pageNumber;
-			_tiles[i].tileFrameX[0] = _currentTile.x;
-			_tiles[i].tileFrameY[0] = _currentTile.y;
-			_tiles[i].terrain = terrainSelect(_currentTile.x, _currentTile.y);
+			if (_drag.startX == -1 && _drag.startY == -1)
+			{
+				_drag.startX = i % _tiles.xSize;
+				_drag.startY = i / _tiles.xSize;
+			}
+			else
+			{
+				_drag.endX = i % _tiles.xSize;
+				_drag.endY = i % _tiles.ySize;
+				break;
+			}
 		}
-		//중간 레이어
-		if (_layer[1])
+	}
+	if (_drag.startX > _drag.endX)
+	{
+		int tmp;
+		tmp = _drag.startX;
+		_drag.startX = _drag.endX;
+		_drag.endX = tmp;
+	}
+	if (_drag.startY > _drag.endY)
+	{
+		int tmp;
+		tmp = _drag.startY;
+		_drag.startY = _drag.endY;
+		_drag.endY = tmp;
+	}
+}
+
+void maptoolScene::setAllMap() 
+{
+	if (_layer != 0)
+	{
+		for (int i = 0; i < _tiles.xSize * _tiles.ySize; i++) 
 		{
-			_tiles[i].canMove[1] = _canMove;
-			_tiles[i].tileFrameX[1] = _currentTile.x;
-			_tiles[i].tileFrameY[1] = _currentTile.y;
-			_tiles[i].imagePage[1] = _currentTile.pageNumber;
-			_tiles[i].terrain = terrainSelect(_currentTile.x, _currentTile.y);
-		}
-		//가장 위 레이어
-		if (_layer[2])
-		{
-			_tiles[i].canMove[2] = _canMove;
-			_tiles[i].tileFrameX[2] = _currentTile.x;
-			_tiles[i].tileFrameY[2] = _currentTile.y;
-			_tiles[i].imagePage[2] = _currentTile.pageNumber;
-			_tiles[i].terrain = terrainSelect(_currentTile.x, _currentTile.y);
+			if (_layer == 1)
+			{
+				_tiles.tile[i].canMove[_layer - 1] = _canMove;
+				_tiles.tile[i].imagePage[_layer - 1] = _currentTile.pageNumber;
+				_tiles.tile[i].tileFrameX[_layer - 1] = _currentTile.x;
+				_tiles.tile[i].tileFrameY[_layer - 1] = _currentTile.y;
+				_tiles.tile[i].terrain = terrainSelect(_currentTile.x, _currentTile.y);
+			}
 		}
 	}
 }
@@ -641,7 +664,7 @@ void maptoolScene::save(char* str)
 	HANDLE file;
 	DWORD write;
 
-	for (int i = 0; i < TILEY; i++)
+	/*for (int i = 0; i < TILEY; i++)
 	{
 		for (int j = 0; j < TILEX; j++)
 		{
@@ -653,17 +676,17 @@ void maptoolScene::save(char* str)
 	file = CreateFile(str, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	WriteFile(file, _saveTile, sizeof(tagTile) * TILEX * TILEY, &write, NULL);
-	CloseHandle(file);
+	CloseHandle(file);*/
 }
 void maptoolScene::load(char* str)
 {
 	HANDLE file;
 	DWORD read;
 
-	file = CreateFile(str, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	//file = CreateFile(str, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
-	ReadFile(file, _tiles, sizeof(tagTile) * TILEX * TILEY, &read, NULL);
-	CloseHandle(file);
+	//ReadFile(file, _tiles, sizeof(tagTile) * TILEX * TILEY, &read, NULL);
+	//CloseHandle(file);
 }
 
 void maptoolScene::saveMapData(char* str)
@@ -703,6 +726,130 @@ void maptoolScene::loadMapData(char* str)
 	CloseHandle(file);
 }
 
+void maptoolScene::drawToolLayer()
+{
+	Rectangle(getMemDC(), _rcTool);
+	if (PtInRect(&_rcNewMap, _ptMouse))
+	{
+		HBRUSH brush = CreateSolidBrush(RGB(172, 172, 172));
+		HBRUSH oldBrush = (HBRUSH)SelectObject(getMemDC(), brush);
+		Rectangle(getMemDC(), _rcNewMap);
+		SelectObject(getMemDC(), oldBrush);
+		DeleteObject(brush);
+	}
+	else
+	{
+		Rectangle(getMemDC(), _rcNewMap);
+	}
+	IMAGEMANAGER->render("NewMap", getMemDC(), _rcNewMap.left + 3, _rcNewMap.top + 3);
+	if (PtInRect(&_rcSaveMap, _ptMouse))
+	{
+		HBRUSH brush = CreateSolidBrush(RGB(172, 172, 172));
+		HBRUSH oldBrush = (HBRUSH)SelectObject(getMemDC(), brush);
+		Rectangle(getMemDC(), _rcSaveMap);
+		SelectObject(getMemDC(), oldBrush);
+		DeleteObject(brush);
+	}
+	else
+	{
+		Rectangle(getMemDC(), _rcSaveMap);
+	}
+	IMAGEMANAGER->render("SaveMap", getMemDC(), _rcSaveMap.left + 3, _rcSaveMap.top + 3);
+	for (int i = 0; i < 3; i++)
+	{
+		if(PtInRect(&_rcLayer[i], _ptMouse))
+		{
+			HBRUSH brush = CreateSolidBrush(RGB(172, 172, 172));
+			HBRUSH oldBrush = (HBRUSH)SelectObject(getMemDC(), brush);
+			Rectangle(getMemDC(), _rcLayer[i]);
+			SelectObject(getMemDC(), oldBrush);
+			DeleteObject(brush);
+		}
+		else
+		{
+			Rectangle(getMemDC(), _rcLayer[i]);
+		}
+		IMAGEMANAGER->frameRender("MapLayer", getMemDC(), _rcLayer[i].left + 3, _rcLayer[i].top + 3, i, 1);
+	}
+	if(PtInRect(&_rcEvent, _ptMouse))
+	{
+		HBRUSH brush = CreateSolidBrush(RGB(172, 172, 172));
+		HBRUSH oldBrush = (HBRUSH)SelectObject(getMemDC(), brush);
+		Rectangle(getMemDC(), _rcEvent);
+		SelectObject(getMemDC(), oldBrush);
+		DeleteObject(brush);
+	}
+	else
+	{
+	Rectangle(getMemDC(), _rcEvent);
+	}
+	IMAGEMANAGER->render("Event", getMemDC(), _rcEvent.left + 3, _rcEvent.top + 3);
+	if (PtInRect(&_rcEraser, _ptMouse))
+	{
+		HBRUSH brush = CreateSolidBrush(RGB(172, 172, 172));
+		HBRUSH oldBrush = (HBRUSH)SelectObject(getMemDC(), brush);
+		Rectangle(getMemDC(), _rcEraser);
+		SelectObject(getMemDC(), oldBrush);
+		DeleteObject(brush);
+	}
+	else
+	{
+		Rectangle(getMemDC(), _rcEraser);
+	}
+	IMAGEMANAGER->render("Eraser", getMemDC(), _rcEraser.left + 3, _rcEraser.top + 3);
+	if (PtInRect(&_rcPen, _ptMouse))
+	{
+		HBRUSH brush = CreateSolidBrush(RGB(172, 172, 172));
+		HBRUSH oldBrush = (HBRUSH)SelectObject(getMemDC(), brush);
+		Rectangle(getMemDC(), _rcPen);
+		SelectObject(getMemDC(), oldBrush);
+		DeleteObject(brush);
+	}
+	else
+	{
+		Rectangle(getMemDC(), _rcPen);
+	}
+	IMAGEMANAGER->render("Pencle", getMemDC(), _rcPen.left + 3, _rcPen.top + 3);
+	if (PtInRect(&_rcRectangle, _ptMouse))
+	{
+		HBRUSH brush = CreateSolidBrush(RGB(172, 172, 172));
+		HBRUSH oldBrush = (HBRUSH)SelectObject(getMemDC(), brush);
+		Rectangle(getMemDC(), _rcRectangle);
+		SelectObject(getMemDC(), oldBrush);
+		DeleteObject(brush);
+	}
+	else
+	{
+		Rectangle(getMemDC(), _rcRectangle);
+	}
+	IMAGEMANAGER->render("Rectangle", getMemDC(), _rcRectangle.left + 3, _rcRectangle.top + 3);
+	if(PtInRect(&_rcPaint, _ptMouse))
+	{
+		HBRUSH brush = CreateSolidBrush(RGB(172, 172, 172));
+		HBRUSH oldBrush = (HBRUSH)SelectObject(getMemDC(), brush);
+		Rectangle(getMemDC(), _rcPaint);
+		SelectObject(getMemDC(), oldBrush);
+		DeleteObject(brush);
+	}
+	else
+	{
+	Rectangle(getMemDC(), _rcPaint);
+	}
+	IMAGEMANAGER->render("Paint", getMemDC(), _rcPaint.left + 3, _rcPaint.top + 3);
+}
+
+void maptoolScene::setTiles()
+{
+	for (int i = 0; i < _tiles.xSize; i++)
+	{
+		for (int j = 0; j < _tiles.ySize; j++)
+		{
+			_addTile.rc = RectMake(_rcTileScreen.left + (j * 40), _rcTileScreen.top + (i * 40), TILESIZE, TILESIZE);
+			_tiles.tile.push_back(_addTile);
+		}
+	}
+}
+
 void maptoolScene::frameBoxRender(int left, int top, int width, int height, float scale)
 {
 	IMAGEMANAGER->findImage("FrameL")->scaleRender(getMemDC(), left, top, 0, 0, 17 * scale, height, scale);
@@ -735,25 +882,6 @@ void maptoolScene::frameBoxRender(RECT rc, float scale)
 
 	//모서리
 
-}
-
-void maptoolScene::selectLayer1()
-{
-	_layer[0] = true;
-	_layer[1] = false;
-	_layer[2] = false;
-}
-void maptoolScene::selectLayer2()
-{
-	_layer[0] = false;
-	_layer[1] = true;
-	_layer[2] = false;
-}
-void maptoolScene::selectLayer3()
-{
-	_layer[0] = false;
-	_layer[1] = false;
-	_layer[2] = true;
 }
 
 TERRAIN maptoolScene::terrainSelect(int frameX, int frameY)
