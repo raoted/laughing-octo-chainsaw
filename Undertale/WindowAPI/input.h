@@ -26,8 +26,5 @@ public:
 	bool GetKeyUp(int key);
 	//토글키냐? (참고로 유니티에는 이기능은 없음)
 	bool GetToggleKey(int key);
-
-	input() {}
-	~input() {}
 };
 

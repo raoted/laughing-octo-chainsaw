@@ -82,15 +82,7 @@ void loadingScene::loadingImage()
 	//#=============================================================================================================
 	//#									UI 불러오기
 	//#=============================================================================================================
-	_loading->loadImage("FrameT", "Image/UI/FrameT.bmp", 575, 17);
-	_loading->loadImage("FrameB", "Image/UI/FrameB.bmp", 575, 17);
-	_loading->loadImage("FrameL", "Image/UI/FrameL.bmp", 17, 275);
-	_loading->loadImage("FrameR", "Image/UI/FrameR.bmp", 17, 275);
-
-	_loading->loadImage("FrameLT", "Image/UI/FrameLT.bmp", 17, 17);
-	_loading->loadImage("FrameLB", "Image/UI/FrameLB.bmp", 17, 17);
-	_loading->loadImage("FrameRT", "Image/UI/FrameRT.bmp", 17, 17);
-	_loading->loadImage("FrameRB", "Image/UI/FrameRB.bmp", 17, 17);
+	_loading->loadImage("tileMouse", "Image/UI/tileMouse.bmp", 40, 40);
 
 	_loading->loadImage("accountbox", "Image/UI/Button/accountbox.bmp", 742, 191);
 	_loading->loadImage("activetextbox", "Image/UI/Button/activetextbox.bmp", 600, 800);
@@ -134,6 +126,7 @@ void loadingScene::loadingImage()
 	//#=============================================================================================================
 	//#									타일 이미지 불러오기
 	//#=============================================================================================================
+	_loading->loadImage("null", "Image/Tileset/nullTile.bmp", 40, 40);
 	_loading->loadFrameImage("Tile1", "Image/Tileset/Home1.bmp", 160, 100, 8, 5);
 	_loading->loadFrameImage("Tile2", "Image/Tileset/Ruin1.bmp", 160, 100, 8, 5);
 	_loading->loadFrameImage("Tile3", "Image/Tileset/Ruin2.bmp", 160, 100, 8, 5);
