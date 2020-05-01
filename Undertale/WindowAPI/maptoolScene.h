@@ -22,7 +22,8 @@ private:
 	bool _canMove;					//현재 선택한 타일이 이동 가능한 타일인가?
 	bool _direct[4] = { false, };	//현재 선택한 타일에서 어떤 방향으로 이동할 수 있는가?
 									//0:상	1:하	  2:좌  3:우
-	short _count;
+	
+	short _mapNumber;				//몇번째 맵을 작성할 것인가?
 	short _drawMode;				//타일에 어떤 모드로 그릴 것인가?
 									//0 : 지우개
 									//1 : 펜
@@ -52,10 +53,6 @@ private:
 	unsigned short _mapAmount;
 	unsigned short _tileAmount;
 
-	int _startFile;			/*파일 명은 0번부터 시작
-							ex) MAP0.map	MAP0.mapdata
-							*/
-
 	int _palettePage;		//지금 샘플 타일에 몇번째 샘플 이미지가 그려지는지를 저장한 변수.
 
 private:
@@ -66,8 +63,11 @@ private:
 	vector<MAPLIST> _vMapList;				//맵 목록들을 저장할 MAPLIST 벡터
 	tagSampleTile _sampleTile[60];	//샘플타일 총 (12-2)*6 = 60개
 	tagCurrentTile _currentTile;	//현재타일
-
-
+private:
+	char section[128];
+	char key[128];
+	char value[128];
+	unsigned int _mapCount;
 private:
 	RECT rc;			//intersectRect 비교용 Rect
 	RECT _rcTool;		//새 맵, 펜, 지우개 등 도구 버튼들이 위치할 공간.
@@ -79,12 +79,14 @@ private:
 	RECT _rcPen;		//그리기 모드를 펜 형태로 변경하는 툴 버튼 Rect
 	RECT _rcRectangle;	//그리기 모드를 사각형으로 변경하는 툴 버튼 Rect
 	RECT _rcPaint;		//그리기 모드를 전체로 변경하는 툴 버튼 Rect
+	RECT _rcSetting;	//생성된 타일의 크기를 변경하는 툴 버튼 Rect
 
-	RECT _rcPalette;	//샘플타일을 그려줄 Rect;
-	RECT _rcMapList;	//맵 목록을 그려주는 공간
+	RECT _rcPalette;		//샘플타일을 그려줄 Rect;
+	RECT _rcMapList;		//맵 목록을 그려주는 공간
+	RECT _rcMapListSlide;	//맵 목록을 슬라이드 시킬 Rect
 	RECT _rcTileScreen;
-	RECT _rcScreen;		//화면 카메라 Rect;
-						//이 Rect와 충돌한 타일만 화면에 그려진다.
+	RECT _rcScreen;			//화면 카메라 Rect;
+							//이 Rect와 충돌한 타일만 화면에 그려진다.
 
 	RECT _rcMouse;		//마우스 포인터를 따라다니는 Rect
 						//중심점은 마우스 포인터의 좌표이며
@@ -110,8 +112,8 @@ public:
 	void setMap();						//일반 채우기
 	void setRectangle();
 	void setAllMap();					//전체 채우기
-	void save(char* str);				//제작한 맵을 저장하는 함수
-	void load(char* str);				//제작된 맵을 불러오는 함수
+	void save(char* str, int i);				//제작한 맵을 저장하는 함수
+	void load(char* str, int i);				//제작된 맵을 불러오는 함수
 	void saveMapData(char *str);		//샘플타일의 속성을 프로젝트 폴더의 하위 폴더인 MapData에
 										//.mapdata 확장자로 저장된다.
 										//현재 버그로 미동작.
@@ -120,9 +122,11 @@ public:
 	void drawToolLayer();				//툴 레이어에 아이콘들을 그려준다.
 	void rcRectangleDraw(int startX, int startY, int endX, int endY);
 
-	void setTiles();
+	void addMap();						//맵 추가
+	void loadMap();
 
-	void drawMapList();
+	void checkSampleTile(int wMouse);	
+	void drawMapList();					//맵 목록을 그려주는 함수
 
 
 	//지형, 오브젝트 세터

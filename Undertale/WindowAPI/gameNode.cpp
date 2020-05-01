@@ -93,6 +93,10 @@ LRESULT gameNode::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		_ptMouse.x = LOWORD(lParam);
 		_ptMouse.y = HIWORD(lParam);
 		break;
+	case WM_MOUSEWHEEL:
+		if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) { _wMouse = -1; }
+		if (GET_WHEEL_DELTA_WPARAM(wParam) < 0) { _wMouse = 1; }
+		break;
 	case WM_KEYDOWN:		
 		switch (wParam)
 		{

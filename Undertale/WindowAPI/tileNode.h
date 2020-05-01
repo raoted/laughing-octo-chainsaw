@@ -20,7 +20,8 @@
 //지형
 struct TERRAIN
 {
-	int x, y;		//타일(x, y)인지 저장.
+	int x = 0;
+	int y = 0;		//타일(x, y)인지 저장.
 };
 
 //타일구조체
@@ -46,8 +47,8 @@ struct tagTile
 	const short xSizeMax = 300;
 	const short ySizeMax = 300;
 
-	unsigned short xSize = 20;
-	unsigned short ySize = 20;
+	unsigned int xSize = 20;
+	unsigned int ySize = 20;
 };
 
 //이미지 타일 구조체
@@ -56,8 +57,8 @@ struct tagSampleTile
 	RECT rc;
 
 	int imagePage;							//샘플타일 번호
-	int tileFrameX;							//가로 몇 번째가 그려지는지를 저장한 변수
-	int tileFrameY;							//세로 몇 번째가 그려지는지를 저장한 변수
+	int tileFrameX = 0;							//가로 몇 번째가 그려지는지를 저장한 변수
+	int tileFrameY = 0;							//세로 몇 번째가 그려지는지를 저장한 변수
 	
 	bool canMove = false;					//이 타일로 이동이 가능한가?
 											//기본값 : 이동불가

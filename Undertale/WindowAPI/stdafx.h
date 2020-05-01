@@ -26,6 +26,7 @@ using namespace std;
 #include <map>
 //추가로 사용할 헤더입니다.
 #include <Shlwapi.h>
+#include <fstream>
 
 //=============================================================
 //	## 내가 만든 헤더파일을 이곳에 추가한다 ##
@@ -75,3 +76,4 @@ using namespace MY_UTIL;
 extern HINSTANCE	_hInstance;
 extern HWND			_hWnd;
 extern POINT		_ptMouse;
+extern SHORT		_wMouse;		//휠 상태를 저장
