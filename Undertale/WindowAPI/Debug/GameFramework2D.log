@@ -1,0 +1,3 @@
+﻿  maptoolScene.cpp
+C:\Users\PC\Documents\personalityProject\Undertale\WindowAPI\maptoolScene.cpp(972,35): warning C4018: '<=': signed 또는 unsigned가 일치하지 않습니다.
+  GameFramework2D.vcxproj -> C:\Users\PC\Documents\personalityProject\Undertale\WindowAPI\Debug\GameFramework2D.exe

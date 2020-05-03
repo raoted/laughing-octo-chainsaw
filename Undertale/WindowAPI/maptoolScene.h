@@ -17,6 +17,8 @@ class maptoolScene : public gameNode
 {
 private:
 	bool _editMode;					//맵파일 속성 입력 모드.
+	bool _resizeMode;				//맵 크기 조절 모드
+
 	bool _editCanMove;				//해당 타일로 이동을 변경할 수 있는지 판단해주는 bool 변수
 	bool _editMoveDirect;			//해당 타일에서 이동 방향을 변경할 수 있는지 판단해주는 bool 변수
 	bool _canMove;					//현재 선택한 타일이 이동 가능한 타일인가?
@@ -80,6 +82,7 @@ private:
 	RECT _rcRectangle;	//그리기 모드를 사각형으로 변경하는 툴 버튼 Rect
 	RECT _rcPaint;		//그리기 모드를 전체로 변경하는 툴 버튼 Rect
 	RECT _rcSetting;	//생성된 타일의 크기를 변경하는 툴 버튼 Rect
+	RECT _rcHome;		//메인 화면으로 이동시키는 툴 버튼 Rect
 
 	RECT _rcPalette;		//샘플타일을 그려줄 Rect;
 	RECT _rcMapList;		//맵 목록을 그려주는 공간
@@ -97,6 +100,15 @@ private:
 
 	char _pageNum[100];
 	char _pageName[100];
+private:
+	RECT _rcResize;		//맵 크기 재설정 창을 그려줄 Rect
+	RECT _rcResizeX;		//맵의 x축 타일 갯수
+	RECT _rcResizeY;		//맵의 y축 타일 갯수
+	RECT _rcConfirm;
+	RECT _rcCancle;
+
+	unsigned short x;
+	unsigned short y;
 
 
 public:
@@ -127,6 +139,7 @@ public:
 
 	void checkSampleTile(int wMouse);	
 	void drawMapList();					//맵 목록을 그려주는 함수
+	void mapResizing();
 
 
 	//지형, 오브젝트 세터
