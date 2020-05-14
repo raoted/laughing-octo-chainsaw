@@ -18,7 +18,7 @@ HRESULT item::init(ITEM_TYPE itemType, const char* itemDes)
 	_itemInfo->_itemType = itemType;
 	int len = strlen(itemDes);
 	_itemInfo->_itemDes = new char[len + 1];
-	strcpy_s(_itemInfo->_itemDes, sizeof(_itemInfo->_itemDes), itemDes);
+	strcpy(_itemInfo->_itemDes, itemDes);
 
 	return S_OK;
 }
@@ -30,14 +30,14 @@ HRESULT item::init(const char* itemName, ITEM_TYPE itemType, const char* itemDes
 
 	len = strlen(itemName);
 	_itemName = new char[len + 1];
-	strcpy_s(_itemName, sizeof(_itemName), itemName);
+	strcpy(_itemName, itemName);
 
 	_itemInfo = new ITEM_INFO;
 	_itemInfo->_itemType = itemType;
 	
 	len = strlen(itemDes);
 	_itemInfo->_itemDes = new char[len + 1];
-	strcpy_s(_itemInfo->_itemDes, sizeof(_itemInfo->_itemDes), itemDes);
+	strcpy(_itemInfo->_itemDes, itemDes);
 
 	_itemPrice = itemPrice;
 	_itemAtk = itemAtk;
@@ -53,14 +53,14 @@ HRESULT item::init(const char* itemName, ITEM_TYPE itemType, const char* itemDes
 
 	len = strlen(itemName);
 	_itemName = new char[len + 1];
-	strcpy_s(_itemName, sizeof(_itemName), itemName);
+	strcpy(_itemName, itemName);
 
 	_itemInfo = new ITEM_INFO;
 	_itemInfo->_itemType = itemType;
 	
 	len = strlen(itemDes);
 	_itemInfo->_itemDes = new char[len + 1];
-	strcpy_s(_itemInfo->_itemDes, sizeof(_itemInfo->_itemDes), itemDes);
+	strcpy(_itemInfo->_itemDes, itemDes);
 
 	_itemPrice = itemPrice;
 	_itemDef = itemDef;
@@ -76,14 +76,14 @@ HRESULT item::init(const char* itemName, ITEM_TYPE itemType, const char* itemDes
 
 	len = strlen(itemName);
 	_itemName = new char[len + 1];
-	strcpy_s(_itemName, sizeof(_itemName), itemName);
+	strcpy(_itemName, itemName);
 
 	_itemInfo = new ITEM_INFO;
 	_itemInfo->_itemType = itemType;
 	
 	len = strlen(itemDes);
 	_itemInfo->_itemDes = new char[len + 1];
-	strcpy_s(_itemInfo->_itemDes, sizeof(_itemInfo->_itemDes), itemDes);
+	strcpy(_itemInfo->_itemDes, itemDes);
 
 	_itemPrice = itemPrice;
 	_itemEffect = itemEffect;

@@ -1,2 +1,0 @@
-C:\Users\PC\Documents\personalityProject\Undertale\WindowAPI\Debug\GameFramework2D.exe
-C:\Users\PC\Documents\personalityProject\Undertale\WindowAPI\Debug\GameFramework2D.pdb

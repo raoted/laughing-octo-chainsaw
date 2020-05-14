@@ -6,6 +6,9 @@
 //=============================================================
 HRESULT gameNode::init()
 {
+	AddFontResource("Data/System/Font/DungGeunMo.ttf");
+	//AddFontResource("윤디자인웹돋움.ttf");
+
 	_hdc = GetDC(_hWnd);				//HDC 초기화
 	SetTimer(_hWnd, 1, 10, NULL);		//타이머 초기화
 	INPUT->init();						//입력매니져 초기화
@@ -53,6 +56,9 @@ void gameNode::release()
 
 	//HDC 해제
 	ReleaseDC(_hWnd, _hdc);
+	
+	RemoveFontResource("Data/System/Font/DungGeunMo.ttf");
+	//RemoveFontResource("윤디자인웹돋움.ttf");
 }
 
 //=============================================================

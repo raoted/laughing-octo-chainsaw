@@ -15,15 +15,17 @@ HRESULT mainGame::init()
 	/*씬추가*/
 	SCENEMANAGER->addScene("시작화면", new startScene);
 	SCENEMANAGER->addScene("게임화면", new inGameScene);
-	SCENEMANAGER->addScene("INI테스트", new iniTestScene);
 	SCENEMANAGER->addScene("로딩화면", new loadingScene);
-	SCENEMANAGER->addScene("픽셀충돌", new pixelCollisionScene);
-	SCENEMANAGER->addScene("사운드", new soundTestScene);
-	SCENEMANAGER->addScene("맵툴기초", new maptoolScene);
+	SCENEMANAGER->addScene("맵툴화면", new maptoolScene);
+	SCENEMANAGER->addScene("전투화면", new battleScene);
 	
 
 	/*현재씬 설정*/
 	SCENEMANAGER->loadScene("로딩화면");
+
+	ITEMMANAGER->addFoodItem("버터스카치 파이", "버터스카치 파이", 99, "버터스카치-시나몬 파이 한 조각이다.", 180);
+	ITEMMANAGER->addFoodItem("전설의 영웅", "전설의 영웅", 99, "검 모양 샌드위치.", 40);
+	ITEMMANAGER->addFoodItem("눈사람 조각", "눈사람 조각", 45, "부디 이 땅의 끝까지 가져가줬으면 좋겠어.", 40);
 
 	return S_OK;
 }

@@ -1,10 +1,15 @@
 #pragma once
 #include "gameNode.h"
-
+struct MENUBUTTON
+{
+	RECT rc;
+	string sceneName;
+	RECT imageRect;
+};
 class startScene : public gameNode
 {
 private:
-	RECT _rc;
+	MENUBUTTON _menuButton[3];
 
 public:
 	HRESULT init();

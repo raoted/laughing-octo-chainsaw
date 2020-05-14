@@ -1,78 +1,209 @@
 #include "stdafx.h"
 #include "enemy.h"
 
-HRESULT enemy::init()
+HRESULT Dummy::init()
 {
+	_image = IMAGEMANAGER->findImage("Dummy");
+	_atk = 0;
+	_def = 0;
+	_HP = _maxHP = 5;
+	_getMoney = 100;
+	_getExp = 200;
+	_name = "더미";
+
+	_vString.clear();
+	_explanation.clear();
+	_vString.push_back("*(연습용 인형이다.)");
+	_explanation.push_back(_vString);
+
+	_act.push_back("살펴보기");
+	_act.push_back("대화하기");
+
+	_marcy.push_back("도망가기");
+	_marcy.push_back("살려주기");
+
 	return S_OK;
 }
 
-HRESULT enemy::init(const char * imageName, POINT position)
+void Dummy::release()
 {
-	//프레임 변수 초기화
+}
+
+void Dummy::update()
+{
+}
+
+void Dummy::render(int x, int y)
+{
+}
+
+void Dummy::attack()
+{
+}
+
+void Dummy::animation()
+{
+}
+
+void Dummy::pattern1()
+{
+}
+
+
+HRESULT Napstablook::init()
+{
+	_image = IMAGEMANAGER->findImage("Napstablook");
+	_image->setFrameX(0);
+	_image->setFrameY(0);
+
+	_atk = 5;
+	_def = 4;
+	_HP = _maxHP = 88;
+	_getMoney = 0;
+	_getExp = 0;
+	_name = "냅스타블룩";
+
+	_vString.clear();
+	_explanation.clear();
+	_vString.push_back("*(이 괴물은 유머 감각이 없어 보인다...)");
+	_explanation.push_back(_vString);
+	_vString.clear();
+	_vString.push_back("*(이 괴물은 자신감이 없어 보인다...)");
+	_explanation.push_back(_vString);
 	_count = 0;
-	_currentFrameX = _currentFrameY = 0;
+	_frame = 0;
 
-	//이미지, 이미지렉트 초기화
-	_image = IMAGEMANAGER->findImage(imageName);
-	_rc = RectMakeCenter(position.x, position.y, _image->getFrameWidth(), _image->getFrameHeight());
+	_act.push_back("살펴보기");
+	_act.push_back("대화하기");
 
-	//랜덤으로 총알 쿨타임 주는 변수 초기화
-	_fireCount = 0;
-	_rndFireConut = RANDOM->Range(1, 1000);
+	_marcy.push_back("도망가기");
+	_marcy.push_back("살려주기");
 
 	return S_OK;
 }
 
-void enemy::release()
+void Napstablook::release()
 {
 }
 
-void enemy::update()
+void Napstablook::update()
 {
-	this->move();
 	this->animation();
-	this->move();
 }
 
-void enemy::render()
+void Napstablook::render(int x, int y)
 {
-	this->draw();
+	_image->scaleFrameRender(getMemDC(), x, y, _image->getFrameX(), _image->getFrameY(), 2.0f);
 }
 
-//알아서 만들면 된다
-void enemy::move()
+void Napstablook::attack()
 {
+
 }
 
-void enemy::draw()
-{
-	_image->frameRender(getMemDC(), _rc.left, _rc.top, _currentFrameX, _currentFrameY);
-}
-
-void enemy::animation()
+void Napstablook::animation()
 {
 	_count++;
-	if (_count % 3 == 0)
+	if (_count == 10)
 	{
-		_image->setFrameX(_image->getFrameX() + 1);
-		_currentFrameX++;
-		if (_currentFrameX >= _image->getMaxFrameX())
-		{
-			_currentFrameX = 0;
-			_count = 0;
-		}
+		_count = 0;
+		_frame++;
+		if (_frame > 1) { _frame = 0; }
 	}
+	_image->setFrameX(_frame);
 }
 
-bool enemy::bulletCountFire()
+void Napstablook::pattern1()
 {
-	_fireCount++;
-	if (_fireCount % _rndFireConut == 0)
-	{
-		_rndFireConut = RANDOM->Range(1, 1000);
-		_fireCount = 0;
-
-		return true;
-	}
-	return false;
+	_tear->fire(25, 25, RANDOM->Range(0.0f, 3.0f), 5.0);
+	_tear->fire(40, 30, RANDOM->Range(0.0f, 3.0f), 5.0);
 }
+
+HRESULT Sans::init()
+{
+	_image = IMAGEMANAGER->findImage("Napstablook");
+	_image->setFrameX(0);
+	_image->setFrameY(0);
+
+	_atk = 5;
+	_def = 4;
+	_HP = _maxHP = 88;
+	_getMoney = 0;
+	_getExp = 0;
+	_name = "샌즈";
+
+	_vString.clear();
+	_explanation.clear();
+	_vString.push_back("가장 쉬운 적. 1의 피해만 줄 수 있다.");
+	_explanation.push_back(_vString);
+	_vString.clear();
+	_vString.push_back("가장 쉬운 적. 1의 피해만 줄 수 있다.");
+	_vString.push_back("영원히 피할 수는 없다. 계속 공격하자.");
+	_explanation.push_back(_vString);
+	_count = 0;
+	_frame = 0;
+
+	_act.push_back("살펴보기");
+	_act.push_back("대화하기");
+
+	_marcy.push_back("도망가기");
+	_marcy.push_back("살려주기");
+
+	return S_OK;
+}
+
+void Sans::release()
+{
+}
+
+void Sans::update()
+{
+	this->animation();
+}
+
+void Sans::render(int x, int y)
+{
+	IMAGEMANAGER->scaleRender("SansBody", getMemDC(), x, y, 2.0f);
+	IMAGEMANAGER->scaleFrameRender("SansFace", getMemDC(), x + 22, y + _frame*2,
+		IMAGEMANAGER->findImage("SansFace")->getFrameX(), 
+		IMAGEMANAGER->findImage("SansFace")->getFrameY(), 
+		2.0f);
+}
+
+void Sans::attack()
+{
+	switch (_phase)
+	{
+	case 1:
+		break;
+	case 2:
+		if (_state == _ATTACK)
+		{
+
+		}
+		break;
+	}
+}
+
+void Sans::animation()
+{
+	_count++;
+	if (_count == 10)
+	{
+		_count = 0;
+		_frame++;
+		if (_frame > 1) { _frame = 0; }
+	}
+}
+
+void Sans::setSansFace(int i)
+{
+	IMAGEMANAGER->findImage("SansFace")->setFrameX(i % 5);
+	IMAGEMANAGER->findImage("SamsFace")->setFrameY(i / 5);
+}
+
+void Sans::pattern1()
+{
+
+}
+

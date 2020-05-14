@@ -147,7 +147,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="astarTestScene.h" />
+    <ClInclude Include="astar.h" />
+    <ClInclude Include="battleScene.h" />
     <ClInclude Include="bullet.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="commonMacroFunction.h" />
@@ -156,12 +157,11 @@
     <ClInclude Include="gameNode.h" />
     <ClInclude Include="image.h" />
     <ClInclude Include="imageManager.h" />
-    <ClInclude Include="imageTest.h" />
     <ClInclude Include="inGameScene.h" />
     <ClInclude Include="iniData.h" />
     <ClInclude Include="iniTestScene.h" />
     <ClInclude Include="input.h" />
-    <ClInclude Include="isometricTestScene.h" />
+    <ClInclude Include="Inventory.h" />
     <ClInclude Include="item.h" />
     <ClInclude Include="itemManager.h" />
     <ClInclude Include="loading.h" />
@@ -184,7 +184,8 @@
     <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="astarTestScene.cpp" />
+    <ClCompile Include="astar.cpp" />
+    <ClCompile Include="battleScene.cpp" />
     <ClCompile Include="bullet.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="enemy.cpp" />
@@ -192,12 +193,11 @@
     <ClCompile Include="gameNode.cpp" />
     <ClCompile Include="image.cpp" />
     <ClCompile Include="imageManager.cpp" />
-    <ClCompile Include="imageTest.cpp" />
     <ClCompile Include="inGameScene.cpp" />
     <ClCompile Include="iniData.cpp" />
     <ClCompile Include="iniTestScene.cpp" />
     <ClCompile Include="input.cpp" />
-    <ClCompile Include="isometricTestScene.cpp" />
+    <ClCompile Include="Inventory.cpp" />
     <ClCompile Include="item.cpp" />
     <ClCompile Include="itemManager.cpp" />
     <ClCompile Include="loading.cpp" />

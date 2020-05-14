@@ -8,8 +8,8 @@
 #define TILESIZEY (TILEY * TILESIZE)		//맵 타일의 세로축 픽셀 수
 
 //이미지 타일(화면 우측상단에 붙여놓을 샘플타일)
-#define SAMPLETILEX 12
-#define SAMPLETILEY 6
+#define SAMPLETILEX 8
+#define SAMPLETILEY 5
 
 //샘플타일 개수 정의
 //샘플 타일은 총 69가지가 있습니다
@@ -18,6 +18,7 @@
 //레이어 개수 정의
 #define LAYERCOUNT 3
 //지형
+
 struct TERRAIN
 {
 	int x = 0;
@@ -30,16 +31,20 @@ struct TILE
 {
 	TERRAIN terrain;
 	RECT rc;
-	bool canMove[LAYERCOUNT] = { false, };			//이 타일 위를 이동할 수 있는지 확인해주는 bool 변수
-													//기본값 false
-													//하나라도 false면 이 타일 위로는 이동할 수 없음
-	bool direct[4] = { false, };					//이동이 가능하다면 어떤 방향으로 이동할 수 있는지 정의
-													//true일 경우에만 이동 가능.
-													//기본값 == false
-													//0: 위, 1: 아래, 2: 좌, 3: 우
+	bool canMove[LAYERCOUNT] = { true, true, true};	
+	//이 타일 위를 이동할 수 있는지 확인해주는 bool 변수
+	//기본값 true
+	//하나라도 false면 이 타일 위로는 이동할 수 없음
+	
+	bool direct[4] = { true, true, true, true };	
+	//이동이 가능하다면 어떤 방향으로 이동할 수 있는지 정의
+	//true일 경우에만 이동 가능.
+	//기본값 == false
+	//0: 위, 1: 아래, 2: 좌, 3: 우
+	
 	int imagePage[LAYERCOUNT] = { -1, -1, -1};		//어떤 샘플맵을 그렸는지 저장하는 변수
-	int tileFrameX[LAYERCOUNT];						//imagePage의 가로로 몇 번째 타일인지 저장하는 변수
-	int tileFrameY[LAYERCOUNT];						//imagePage의 세로로 면 번째 타일인지 저장하는 변수
+	int tileFrameX[LAYERCOUNT];		//imagePage의 가로로 몇 번째 타일인지 저장하는 변수
+	int tileFrameY[LAYERCOUNT];		//imagePage의 세로로 면 번째 타일인지 저장하는 변수
 };
 struct tagTile
 {
@@ -60,9 +65,10 @@ struct tagSampleTile
 	int tileFrameX = 0;							//가로 몇 번째가 그려지는지를 저장한 변수
 	int tileFrameY = 0;							//세로 몇 번째가 그려지는지를 저장한 변수
 	
-	bool canMove = false;					//이 타일로 이동이 가능한가?
+	bool canMove = true;					//이 타일로 이동이 가능한가?
 											//기본값 : 이동불가
-	bool direct[4] = { false, };			//이 타일에서 어떤 방향으로 이동이 가능한가?
+	bool direct[4] = { true, true, true, true};			
+	//이 타일에서 어떤 방향으로 이동이 가능한가?
 											//기본값 : 이동불가
 											//0:위  1:아래  2:좌  3:우
 };

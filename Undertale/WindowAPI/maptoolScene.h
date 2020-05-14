@@ -16,13 +16,15 @@ struct MAPLIST
 class maptoolScene : public gameNode
 {
 private:
+	char test[128];
+private:
 	bool _editMode;					//맵파일 속성 입력 모드.
 	bool _resizeMode;				//맵 크기 조절 모드
 
 	bool _editCanMove;				//해당 타일로 이동을 변경할 수 있는지 판단해주는 bool 변수
 	bool _editMoveDirect;			//해당 타일에서 이동 방향을 변경할 수 있는지 판단해주는 bool 변수
 	bool _canMove;					//현재 선택한 타일이 이동 가능한 타일인가?
-	bool _direct[4] = { false, };	//현재 선택한 타일에서 어떤 방향으로 이동할 수 있는가?
+	bool _direct[4] = { true, };	//현재 선택한 타일에서 어떤 방향으로 이동할 수 있는가?
 									//0:상	1:하	  2:좌  3:우
 	
 	short _mapNumber;				//몇번째 맵을 작성할 것인가?
@@ -87,7 +89,7 @@ private:
 	RECT _rcPalette;		//샘플타일을 그려줄 Rect;
 	RECT _rcMapList;		//맵 목록을 그려주는 공간
 	RECT _rcMapListSlide;	//맵 목록을 슬라이드 시킬 Rect
-	RECT _rcTileScreen;
+	RECT _rcMapScreen;
 	RECT _rcScreen;			//화면 카메라 Rect;
 							//이 Rect와 충돌한 타일만 화면에 그려진다.
 
@@ -140,6 +142,7 @@ public:
 	void checkSampleTile(int wMouse);	
 	void drawMapList();					//맵 목록을 그려주는 함수
 	void mapResizing();
+	void mapScreenResizing();
 
 
 	//지형, 오브젝트 세터
